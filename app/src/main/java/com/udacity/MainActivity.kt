@@ -41,14 +41,16 @@ class MainActivity : AppCompatActivity() {
         }
 
         custom_button.setOnClickListener {
-            if (selectedUrl.isEmpty())
+            if (selectedUrl.isEmpty()) {
                 Toast.makeText(
                     this,
                     getString(R.string.select_file_to_download),
                     Toast.LENGTH_SHORT
                 ).show()
-            else
+            } else {
                 download()
+                custom_button.buttonState = ButtonState.Loading
+            }
         }
     }
 

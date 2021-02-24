@@ -3,7 +3,6 @@ package com.udacity
 import android.animation.ValueAnimator
 import android.content.Context
 import android.graphics.Canvas
-import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.PointF
 import android.util.AttributeSet
@@ -17,21 +16,13 @@ class LoadingButton @JvmOverloads constructor(
     private var widthSize = 0
     private var heightSize = 0
 
+    private var progressRight = 0f
+
     private val textPosition = PointF(0.0f, 0.0f)
-
-    private val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        textAlign = Paint.Align.CENTER
-        textSize = resources.getDimensionPixelSize(R.dimen.default_text_size).toFloat()
-    }
-
-    private val valueAnimator = ValueAnimator()
-
-    private var buttonState: ButtonState by Delegates.observable<ButtonState>(ButtonState.Completed) { p, old, new ->
-
-    }
 
     private var beforeLoadBackground = 0
     private var afterLoadBackground = 0
+    private var textColor = 0
 
     init {
         isClickable = true
@@ -39,17 +30,58 @@ class LoadingButton @JvmOverloads constructor(
         context.withStyledAttributes(attrs, R.styleable.LoadingButton) {
             beforeLoadBackground = getColor(R.styleable.LoadingButton_beforeLoadBackground, 0)
             afterLoadBackground = getColor(R.styleable.LoadingButton_afterLoadBackground, 0)
-            paint.color = getColor(R.styleable.LoadingButton_textColor, 0)
+            textColor = getColor(R.styleable.LoadingButton_textColor, 0)
         }
     }
 
+    private val textPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        textAlign = Paint.Align.CENTER
+        textSize = resources.getDimensionPixelSize(R.dimen.default_text_size).toFloat()
+        color = textColor
+    }
+
+    private val progressPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = afterLoadBackground
+    }
+
+    private val valueAnimator = ValueAnimator()
+
+    var buttonState: ButtonState by Delegates.observable(ButtonState.Completed) { p, old: ButtonState, new: ButtonState ->
+        when (new) {
+            ButtonState.Loading -> {
+                showLoading()
+            }
+            ButtonState.Completed -> {
+                hideLoading()
+            }
+            ButtonState.Clicked -> {
+            }
+        }
+    }
+
+    private fun showLoading() {
+        valueAnimator.apply {
+            setFloatValues(widthSize.toFloat())
+            duration = 5000
+            addUpdateListener {
+                progressRight = it.animatedValue as Float
+                invalidate()
+            }
+            start()
+        }
+    }
+
+    private fun hideLoading() {
+        valueAnimator.end()
+    }
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
 
         canvas.drawColor(beforeLoadBackground)
+        canvas.drawRect(0f, 0f, progressRight, heightSize.toFloat(), progressPaint)
         val text = resources.getString(R.string.download)
-        canvas.drawText(text, textPosition.x, textPosition.y, paint)
+        canvas.drawText(text, textPosition.x, textPosition.y, textPaint)
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
@@ -65,7 +97,7 @@ class LoadingButton @JvmOverloads constructor(
         setMeasuredDimension(w, h)
 
         textPosition.x = (widthSize / 2).toFloat()
-        textPosition.y = heightSize / 2 - (paint.descent() + paint.ascent()) / 2
+        textPosition.y = heightSize / 2 - (textPaint.descent() + textPaint.ascent()) / 2
     }
 
 }
