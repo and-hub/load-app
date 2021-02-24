@@ -3,5 +3,6 @@
     <declare-styleable name="LoadingButton">
         <attr name="beforeLoadBackground" format="color" />
         <attr name="afterLoadBackground" format="color" />
+        <attr name="textColor" format="color" />
     </declare-styleable>
 </resources>

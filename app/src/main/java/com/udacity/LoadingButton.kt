@@ -3,6 +3,7 @@ package com.udacity
 import android.animation.ValueAnimator
 import android.content.Context
 import android.graphics.Canvas
+import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.PointF
 import android.util.AttributeSet
@@ -16,7 +17,7 @@ class LoadingButton @JvmOverloads constructor(
     private var widthSize = 0
     private var heightSize = 0
 
-    private val labelPosition = PointF(0.0f, 0.0f)
+    private val textPosition = PointF(0.0f, 0.0f)
 
     private val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         textAlign = Paint.Align.CENTER
@@ -38,6 +39,7 @@ class LoadingButton @JvmOverloads constructor(
         context.withStyledAttributes(attrs, R.styleable.LoadingButton) {
             beforeLoadBackground = getColor(R.styleable.LoadingButton_beforeLoadBackground, 0)
             afterLoadBackground = getColor(R.styleable.LoadingButton_afterLoadBackground, 0)
+            paint.color = getColor(R.styleable.LoadingButton_textColor, 0)
         }
     }
 
@@ -46,8 +48,8 @@ class LoadingButton @JvmOverloads constructor(
         super.onDraw(canvas)
 
         canvas.drawColor(beforeLoadBackground)
-        val label = resources.getString(R.string.app_name)
-        canvas.drawText(label, labelPosition.x, labelPosition.y, paint)
+        val text = resources.getString(R.string.download)
+        canvas.drawText(text, textPosition.x, textPosition.y, paint)
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
@@ -62,8 +64,8 @@ class LoadingButton @JvmOverloads constructor(
         heightSize = h
         setMeasuredDimension(w, h)
 
-        labelPosition.x = (widthSize / 2).toFloat()
-        labelPosition.y = heightSize / 2 - (paint.descent() + paint.ascent()) / 2
+        textPosition.x = (widthSize / 2).toFloat()
+        textPosition.y = heightSize / 2 - (paint.descent() + paint.ascent()) / 2
     }
 
 }

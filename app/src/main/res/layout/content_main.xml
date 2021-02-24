@@ -18,7 +18,8 @@
         app:beforeLoadBackground="@color/colorPrimary"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:textColor="@color/white" />
 
     <RadioGroup
         android:id="@+id/radio_group"
