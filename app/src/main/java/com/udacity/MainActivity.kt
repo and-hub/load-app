@@ -105,7 +105,7 @@ class MainActivity : AppCompatActivity() {
                 NotificationManager.IMPORTANCE_DEFAULT
             )
 
-            notificationChannel.description = "Downloaded file"
+            notificationChannel.description = getString(R.string.download_channel_description)
 
             val notificationManager = getSystemService(
                 NotificationManager::class.java
