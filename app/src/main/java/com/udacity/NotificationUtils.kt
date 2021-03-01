@@ -2,12 +2,25 @@ package com.udacity
 
 import android.app.Notification
 import android.app.NotificationManager
+import android.app.PendingIntent
 import android.content.Context
+import android.content.Intent
 import androidx.core.app.NotificationCompat
 
 private const val NOTIFICATION_ID = 0
+private const val REQUEST_CODE = 0
+private const val FLAGS = 0
 
 fun NotificationManager.sendNotification(messageBody: String, applicationContext: Context) {
+
+    val detailIntent = Intent(applicationContext, DetailReceiver::class.java)
+
+    val detailPendingIntent = PendingIntent.getBroadcast(
+        applicationContext,
+        REQUEST_CODE,
+        detailIntent,
+        FLAGS
+    )
 
     val builder = NotificationCompat.Builder(
         applicationContext,
@@ -19,7 +32,11 @@ fun NotificationManager.sendNotification(messageBody: String, applicationContext
                 .getString(R.string.notification_title)
         )
         .setContentText(messageBody)
-        .setAutoCancel(true)
+        .addAction(
+            R.drawable.ic_assistant_black_24dp,
+            applicationContext.getString(R.string.notification_button),
+            detailPendingIntent
+        )
         .setPriority(NotificationCompat.PRIORITY_DEFAULT)
         .setDefaults(Notification.DEFAULT_ALL)
 
