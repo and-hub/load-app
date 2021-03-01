@@ -5,6 +5,7 @@ import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.PointF
+import android.graphics.RectF
 import android.util.AttributeSet
 import android.view.View
 import androidx.core.content.withStyledAttributes
@@ -20,10 +21,12 @@ class LoadingButton @JvmOverloads constructor(
 
     private var text = resources.getString(R.string.button_download)
     private val textPosition = PointF(0.0f, 0.0f)
+    private var textWidth = 0f
 
     private var beforeLoadBackground = 0
     private var afterLoadBackground = 0
     private var textColor = 0
+    private var loadingCircleColor = 0
 
     init {
         isClickable = true
@@ -32,6 +35,7 @@ class LoadingButton @JvmOverloads constructor(
             beforeLoadBackground = getColor(R.styleable.LoadingButton_beforeLoadBackground, 0)
             afterLoadBackground = getColor(R.styleable.LoadingButton_afterLoadBackground, 0)
             textColor = getColor(R.styleable.LoadingButton_textColor, 0)
+            loadingCircleColor = getColor(R.styleable.LoadingButton_loadingCircleColor, 0)
         }
     }
 
@@ -43,6 +47,10 @@ class LoadingButton @JvmOverloads constructor(
 
     private val progressPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = afterLoadBackground
+    }
+
+    private val circlePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = loadingCircleColor
     }
 
     private val valueAnimator = ValueAnimator()
@@ -63,7 +71,7 @@ class LoadingButton @JvmOverloads constructor(
     private fun showLoading() {
         valueAnimator.apply {
             setFloatValues(1f)
-            duration = 5000
+            duration = 2000
             addUpdateListener {
                 progress = it.animatedValue as Float
                 invalidate()
@@ -71,6 +79,8 @@ class LoadingButton @JvmOverloads constructor(
             start()
         }
         text = resources.getString(R.string.button_loading)
+        textWidth = textPaint.measureText(text)
+        invalidate()
     }
 
     private fun hideLoading() {
@@ -86,6 +96,13 @@ class LoadingButton @JvmOverloads constructor(
         canvas.drawColor(beforeLoadBackground)
         canvas.drawRect(0f, 0f, widthSize * progress, heightSize.toFloat(), progressPaint)
         canvas.drawText(text, textPosition.x, textPosition.y, textPaint)
+        canvas.drawArc(
+            textPosition.x + textWidth / 2,
+            (heightSize / 3).toFloat(),
+            textPosition.x + textWidth / 2 + (heightSize / 3).toFloat(),
+            (heightSize * 2 / 3).toFloat(),
+            270f, 360 * progress, true, circlePaint
+        )
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
