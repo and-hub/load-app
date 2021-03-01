@@ -16,7 +16,7 @@ class LoadingButton @JvmOverloads constructor(
     private var widthSize = 0
     private var heightSize = 0
 
-    private var progressRight = 0f
+    private var progress = 0f
 
     private var text = resources.getString(R.string.button_download)
     private val textPosition = PointF(0.0f, 0.0f)
@@ -62,10 +62,10 @@ class LoadingButton @JvmOverloads constructor(
 
     private fun showLoading() {
         valueAnimator.apply {
-            setFloatValues(widthSize.toFloat())
+            setFloatValues(1f)
             duration = 5000
             addUpdateListener {
-                progressRight = it.animatedValue as Float
+                progress = it.animatedValue as Float
                 invalidate()
             }
             start()
@@ -76,7 +76,7 @@ class LoadingButton @JvmOverloads constructor(
     private fun hideLoading() {
         valueAnimator.end()
         text = resources.getString(R.string.button_download)
-        progressRight = 0f
+        progress = 0f
         invalidate()
     }
 
@@ -84,7 +84,7 @@ class LoadingButton @JvmOverloads constructor(
         super.onDraw(canvas)
 
         canvas.drawColor(beforeLoadBackground)
-        canvas.drawRect(0f, 0f, progressRight, heightSize.toFloat(), progressPaint)
+        canvas.drawRect(0f, 0f, widthSize * progress, heightSize.toFloat(), progressPaint)
         canvas.drawText(text, textPosition.x, textPosition.y, textPaint)
     }
 
