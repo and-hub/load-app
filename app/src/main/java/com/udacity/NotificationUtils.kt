@@ -8,18 +8,19 @@ import android.content.Intent
 import androidx.core.app.NotificationCompat
 
 private const val NOTIFICATION_ID = 0
-private const val REQUEST_CODE = 0
-private const val FLAGS = 0
+private const val EXTRA_NOTIFICATION_ID = "com.udacity.NOTIFICATION_ID"
 
 fun NotificationManager.sendNotification(messageBody: String, applicationContext: Context) {
 
-    val detailIntent = Intent(applicationContext, DetailReceiver::class.java)
+    val detailIntent = Intent(applicationContext, DetailActivity::class.java).apply {
+        putExtra(EXTRA_NOTIFICATION_ID, NOTIFICATION_ID)
+    }
 
-    val detailPendingIntent = PendingIntent.getBroadcast(
+    val detailPendingIntent = PendingIntent.getActivity(
         applicationContext,
-        REQUEST_CODE,
+        NOTIFICATION_ID,
         detailIntent,
-        FLAGS
+        PendingIntent.FLAG_UPDATE_CURRENT
     )
 
     val builder = NotificationCompat.Builder(
