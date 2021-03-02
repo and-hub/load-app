@@ -78,7 +78,10 @@ class MainActivity : AppCompatActivity() {
 
                 val query = DownloadManager.Query().setFilterById(id)
                 val cursor = downloadManager.query(query)
+
                 var status = -1
+                val shortFileName = downloadIDsWithFileNames[id]?.split(" ")?.first()
+
                 if (cursor.moveToFirst()) {
                     status = cursor.getInt(cursor.getColumnIndex(DownloadManager.COLUMN_STATUS))
                 }
@@ -93,7 +96,7 @@ class MainActivity : AppCompatActivity() {
                         id.toInt(),
                         getString(
                             R.string.notification_success_format,
-                            downloadIDsWithFileNames[id]
+                            shortFileName
                         ),
                         context,
                         downloadIDsWithFileNames[id],
@@ -103,7 +106,7 @@ class MainActivity : AppCompatActivity() {
                         id.toInt(),
                         getString(
                             R.string.notification_failed_format,
-                            downloadIDsWithFileNames[id]
+                            shortFileName
                         ),
                         context,
                         downloadIDsWithFileNames[id],
