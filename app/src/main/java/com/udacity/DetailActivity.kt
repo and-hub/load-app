@@ -1,7 +1,7 @@
 package com.udacity
 
-import android.app.DownloadManager
 import android.app.NotificationManager
+import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
@@ -30,6 +30,7 @@ class DetailActivity : AppCompatActivity() {
         }
 
         file_name_text.text = intent.getStringExtra(EXTRA_FILE_NAME) ?: ""
+
         val status = intent.getStringExtra(EXTRA_STATUS) ?: ""
         status_text.text = status
 
@@ -37,6 +38,10 @@ class DetailActivity : AppCompatActivity() {
             status_text.setTextColor(Color.RED)
         } else {
             status_text.setTextColor(getColor(R.color.colorPrimaryDark))
+        }
+
+        ok_button.setOnClickListener {
+            onBackPressed()
         }
     }
 }
