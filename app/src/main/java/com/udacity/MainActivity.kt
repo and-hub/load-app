@@ -3,44 +3,50 @@ package com.udacity
 import android.app.DownloadManager
 import android.app.NotificationChannel
 import android.app.NotificationManager
-import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import android.graphics.Color
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.content_main.*
 
-
 class MainActivity : AppCompatActivity() {
 
-    private var downloadID: Long = 0
+    private var downloadIDsWithFileNames = mutableMapOf<Long, String>()
     private var selectedUrl = ""
+    private var selectedFileName = ""
 
-    private lateinit var notificationManager: NotificationManager
-    private lateinit var pendingIntent: PendingIntent
-    private lateinit var action: NotificationCompat.Action
+    private lateinit var downloadManager: DownloadManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         setSupportActionBar(toolbar)
 
+        downloadManager = getSystemService(DOWNLOAD_SERVICE) as DownloadManager
+
         registerReceiver(receiver, IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE))
 
         radio_group.setOnCheckedChangeListener { _, checkedId ->
-            selectedUrl = when (checkedId) {
-                R.id.glide_radio -> GLIDE_URL
-                R.id.retrofit_radio -> RETROFIT_URL
-                else -> LOAD_APP_URL
+            when (checkedId) {
+                R.id.glide_radio -> {
+                    selectedUrl = GLIDE_URL
+                    selectedFileName = getString(R.string.glide_radio_text)
+                }
+                R.id.retrofit_radio -> {
+                    selectedUrl = RETROFIT_URL
+                    selectedFileName = getString(R.string.retrofit_radio_text)
+                }
+                else -> {
+                    selectedUrl = LOAD_APP_URL
+                    selectedFileName = getString(R.string.load_app_radio_text)
+                }
             }
         }
 
@@ -67,18 +73,44 @@ class MainActivity : AppCompatActivity() {
         override fun onReceive(context: Context, intent: Intent) {
             val id = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1)
 
-            if (id == downloadID) {
+            if (downloadIDsWithFileNames.contains(id)) {
                 custom_button.buttonState = ButtonState.Completed
+
+                val query = DownloadManager.Query().setFilterById(id)
+                val cursor = downloadManager.query(query)
+                var status = -1
+                if (cursor.moveToFirst()) {
+                    status = cursor.getInt(cursor.getColumnIndex(DownloadManager.COLUMN_STATUS))
+                }
 
                 val notificationManager = ContextCompat.getSystemService(
                     context,
                     NotificationManager::class.java
                 ) as NotificationManager
 
-                notificationManager.sendNotification(
-                    getString(R.string.notification_description),
-                    context
-                )
+                when (status) {
+                    DownloadManager.STATUS_SUCCESSFUL -> notificationManager.sendNotification(
+                        id.toInt(),
+                        getString(
+                            R.string.notification_success_format,
+                            downloadIDsWithFileNames[id]
+                        ),
+                        context,
+                        downloadIDsWithFileNames[id],
+                        getString(R.string.success)
+                    )
+                    else -> notificationManager.sendNotification(
+                        id.toInt(),
+                        getString(
+                            R.string.notification_failed_format,
+                            downloadIDsWithFileNames[id]
+                        ),
+                        context,
+                        downloadIDsWithFileNames[id],
+                        getString(R.string.failed)
+                    )
+                }
+                downloadIDsWithFileNames.remove(id)
             }
         }
     }
@@ -87,14 +119,13 @@ class MainActivity : AppCompatActivity() {
         val request =
             DownloadManager.Request(Uri.parse(selectedUrl))
                 .setTitle(getString(R.string.app_name))
-                .setDescription(getString(R.string.app_description))
+                .setDescription(selectedFileName)
                 .setRequiresCharging(false)
                 .setAllowedOverMetered(true)
                 .setAllowedOverRoaming(true)
 
-        val downloadManager = getSystemService(DOWNLOAD_SERVICE) as DownloadManager
-        downloadID =
-            downloadManager.enqueue(request)// enqueue puts the download request in the queue.
+        downloadIDsWithFileNames[downloadManager.enqueue(request)] =
+            selectedFileName// enqueue puts the download request in the queue.
     }
 
     private fun createChannel(channelId: String, channelName: String) {
@@ -124,7 +155,6 @@ class MainActivity : AppCompatActivity() {
         private const val LOAD_APP_URL =
             "https://github.com/udacity/nd940-c3-advanced-android-programming-project-starter/archive/master.zip"
         private const val RETROFIT_URL = "https://github.com/square/retrofit/archive/master.zip"
-        private const val CHANNEL_ID = "channelId"
     }
 
 }

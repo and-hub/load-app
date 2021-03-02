@@ -9,16 +9,20 @@ import androidx.core.app.NotificationCompat
 
 private const val NOTIFICATION_ID = 0
 private const val EXTRA_NOTIFICATION_ID = "com.udacity.NOTIFICATION_ID"
+private const val EXTRA_FILE_NAME = "com.udacity.FILE_NAME"
+private const val EXTRA_STATUS = "com.udacity.STATUS"
 
-fun NotificationManager.sendNotification(messageBody: String, applicationContext: Context) {
+fun NotificationManager.sendNotification(notificationID: Int, messageBody: String, applicationContext: Context, fileName: String?, status: String) {
 
     val detailIntent = Intent(applicationContext, DetailActivity::class.java).apply {
-        putExtra(EXTRA_NOTIFICATION_ID, NOTIFICATION_ID)
+        putExtra(EXTRA_NOTIFICATION_ID, notificationID)
+        putExtra(EXTRA_FILE_NAME, fileName)
+        putExtra(EXTRA_STATUS, status)
     }
 
     val detailPendingIntent = PendingIntent.getActivity(
         applicationContext,
-        NOTIFICATION_ID,
+        notificationID,
         detailIntent,
         PendingIntent.FLAG_UPDATE_CURRENT
     )
@@ -41,5 +45,5 @@ fun NotificationManager.sendNotification(messageBody: String, applicationContext
         .setPriority(NotificationCompat.PRIORITY_DEFAULT)
         .setDefaults(Notification.DEFAULT_ALL)
 
-    notify(NOTIFICATION_ID, builder.build())
+    notify(notificationID, builder.build())
 }
