@@ -19,5 +19,8 @@ class DetailReceiver : BroadcastReceiver() {
             NotificationManager::class.java
         ) as NotificationManager
         notificationManager.cancelAll()
+
+        val it = Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS)
+        context.sendBroadcast(it)
     }
 }
